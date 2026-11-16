@@ -58,22 +58,32 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
         let buffer = '';
 
-        while (true) {
-            const { done, value } = await reader.read();
 
-            if (done) {
-                break;
-            }
 
-            buffer += decoder.decode(value, { 
-                stream: true 
-            });
+            for (const line of lines) {
 
-            const lines = buffer.split('\n');
+                const trimmedLine = line.trim();
 
-            //simpan bagian terakhir karena mungkin belumlengkap
-            buffer = lines.pop();
+                if (trimmedLine) {
+                    continue;
+                }
+
+                if (trimmedLine.startsWith('data: ')) {
+                    continue;
+                }
+
+                const data = trimmedLine.slice(5).trim();
+
+                if (data === '[DONE]') {
+                    continue;
+                }
+
+                try {
+                    const json = JSON.parse(data);
+                    
+                    const content =
