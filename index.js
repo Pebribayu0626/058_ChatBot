@@ -6,11 +6,9 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+app.use(express.json());
+app.use(express.static('public'));
 
-
-app.get('/', (req, res) => {
-    res.redirect("index.html");
-});
 
 app.post('/api/chat', async (req, res) => {
     try {
@@ -33,3 +31,14 @@ app.post('/api/chat', async (req, res) => {
                 },
                 
                 body: JSON.stringify({
+                    model: "inclusionai/ling-3.2-flash:free",
+                    messages: messages,
+                    temperature: 0.7,
+                    max_tokens: 1000,
+                    stream: true
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.text();
